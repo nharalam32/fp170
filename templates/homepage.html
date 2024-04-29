@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+</head>
+<body>
+    <h1>Homepage</h1>
+    <h2>Welcome, {{ user.first_name }} {{ user.last_name }}</h2>
+    <p>Username: {{ user.username }}</p>
+    <p>SSN: {{ user.ssn }}</p>
+    <p>Address: {{ user.address }}</p>
+    <p>Phone Number: {{ user.phone_number }}</p>
+    <p>Balance: ${{ user.balance }}</p>
+    <form action="/add_money" method="POST">
+        <label for="amount">Add Money:</label>
+        <input type="number" id="amount" name="amount" step="0.01" required>
+        <button type="submit">Add</button>
+    </form>
+    <form action="/send_money" method="POST">
+        <label for="recipient_account_number">Recipient Account Number:</label>
+        <input type="text" id="recipient_account_number" name="recipient_account_number" required>
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" step="0.01" required>
+        <button type="submit">Send</button>
+    </form>
+    <a href="/bank_statement">View Bank Statement</a>
+</body>
+</html>
