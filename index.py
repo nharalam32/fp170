@@ -29,6 +29,10 @@ class Transaction(db.Model):
     amount = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
 
+@app.route('/')
+def index():
+    return render_template('base.html')
+
 # Admin route to view and approve user accounts
 @app.route('/admin')
 def admin():
