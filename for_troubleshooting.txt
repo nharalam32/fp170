@@ -1,3 +1,4 @@
+python file:
 from datetime import datetime, timezone
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -61,9 +62,13 @@ def admin_login():
         # Check if the admin user exists in the database
         admin = Admin.query.filter_by(username=username, password=password).first()
         
+        print("Form Username:", username)  # Debugging
+        print("Database Admin Username:", admin.username if admin else None)  # Debugging
+        
         if admin:
             # Set the admin_id in the session upon successful login
             session['admin_id'] = admin.id
+            print("Admin login successful")  # Debugging
             return redirect(url_for('admin'))
         else:
             flash('Invalid username or password', 'error')
@@ -191,3 +196,94 @@ def send_money():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+admin_login.html:
+{% extends "base.html" %}
+{% block heading %}Admin Login{% endblock %}
+{% block content %}
+    <h1>Admin Login</h1>
+    <form action="/admin/login" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Login</button>
+        {% if error %}
+        <p>{{ error }}</p>
+        {% endif %}
+    </form>
+{% endblock %}
+
+admin.html:
+{% extends "base.html" %}
+{% block heading %}Admin{% endblock %}
+{% block content %}
+    <h1>Admin Dashboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>SSN</th>
+                <th>Address</th>
+                <th>Phone Number</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.first_name }}</td>
+                <td>{{ user.last_name }}</td>
+                <td>{{ user.ssn }}</td>
+                <td>{{ user.address }}</td>
+                <td>{{ user.phone_number }}</td>
+                <td>
+                    <form action="/approve/{{ user.id }}" method="POST">
+                        <button type="submit">Approve</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+login.html:
+{% extends "base.html" %}
+{% block heading %}Login{% endblock %}
+{% block content %}
+    <form action="/login" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Register</button>
+    </form>
+{% endblock %}
+
+register:
+{% extends "base.html" %}
+{% block heading %}Create Account{% endblock %}
+{% block content %}
+    <h1>User Registration</h1>
+    <form action="/register" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        <label for="first_name">First Name:</label>
+        <input type="text" id="first_name" name="first_name" required><br><br>
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" required><br><br>
+        <label for="ssn">SSN:</label>
+        <input type="text" id="ssn" name="ssn" required><br><br>
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" required><br><br>
+        <label for="phone_number">Phone Number:</label>
+        <input type="text" id="phone_number" name="phone_number" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Register</button>
+    </form>
+{% endblock %}
