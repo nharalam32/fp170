@@ -16,7 +16,6 @@ class User(db.Model):
     address = db.Column(db.String(100), nullable=False)
     phone_number = db.Column(db.String(15), nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    account_number = db.Column(db.String(12), unique=True)
     balance = db.Column(db.Float, default=0)
     approved = db.Column(db.Boolean, default=False)
 
@@ -69,7 +68,6 @@ from flask import flash, jsonify
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        # Extract user data from form
         username = request.form['username']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
@@ -78,20 +76,25 @@ def register():
         phone_number = request.form['phone_number']
         password = request.form['password']
         
-        # Create a new user object and add it to the database
-        new_user = User(username=username, first_name=first_name, last_name=last_name, ssn=ssn,
-                        address=address, phone_number=phone_number, password=password)
+        new_user = User(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            ssn=ssn,
+            address=address,
+            phone_number=phone_number,
+            password=password
+        )
+        
         db.session.add(new_user)
         db.session.commit()
         
-        # Create a notification for the admin
-        admin_notification = Notification(message=f"New user registration: {username}")
-        db.session.add(admin_notification)
-        db.session.commit()
+        # Set the user_id in the session after registration
+        session['user_id'] = new_user.id
         
-        flash('Your registration request has been submitted for approval. Please wait for admin approval.', 'success')
-        
-        return redirect(url_for('login'))
+        return redirect(url_for('dashboard'))
+    
+    # Render the registration form for GET requests
     return render_template('register.html')
 
 from flask import render_template
@@ -141,8 +144,6 @@ def login():
     
     return render_template('login.html')
 
-
-# Route for user dashboard
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
@@ -150,7 +151,6 @@ def dashboard():
     user = User.query.get(session['user_id'])
     return render_template('dashboard.html', user=user)
 
-# Route for adding money to the account
 @app.route('/add_money', methods=['POST'])
 def add_money():
     if 'user_id' not in session:
@@ -158,21 +158,12 @@ def add_money():
     # Process payment information and update user balance
     return redirect(url_for('dashboard'))
 
-# Route for sending money to another user
 @app.route('/send_money', methods=['POST'])
 def send_money():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     # Process transaction information and update sender and recipient balances
     return redirect(url_for('dashboard'))
-
-# Route for viewing bank statements
-@app.route('/bank_statement')
-def bank_statement():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    # Retrieve transaction history for the user
-    return render_template('bank_statement.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
