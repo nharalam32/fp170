@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:Pennsylvania2004!@localhost/fp170'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://chris:sirhc@172.16.181.82/fp170'
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -26,6 +26,15 @@ class Transaction(db.Model):
     recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     amount = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    message = db.Column(db.String(255), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"Notification('{self.message}', '{self.created_at}')"
+
 
 @app.route('/')
 def index():
@@ -55,24 +64,83 @@ def admin_login():
     return render_template('admin_login.html')
 
 # Route for user registration
+from flask import flash, jsonify
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         # Extract user data from form
+        username = request.form['username']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        ssn = request.form['ssn']
+        address = request.form['address']
+        phone_number = request.form['phone_number']
+        password = request.form['password']
+        
         # Create a new user object and add it to the database
-        # Generate a unique account number
-        # Redirect to login page with a success message
-        pass
+        new_user = User(username=username, first_name=first_name, last_name=last_name, ssn=ssn,
+                        address=address, phone_number=phone_number, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        
+        # Create a notification for the admin
+        admin_notification = Notification(message=f"New user registration: {username}")
+        db.session.add(admin_notification)
+        db.session.commit()
+        
+        flash('Your registration request has been submitted for approval. Please wait for admin approval.', 'success')
+        
+        return redirect(url_for('login'))
     return render_template('register.html')
 
+from flask import render_template
+
+@app.route('/admin/notifications')
+def admin_notifications():
+    if 'admin_id' not in session or session['admin_id'] != 1:
+        return redirect(url_for('admin_login'))
+
+    notifications = Notification.query.all()  # Assuming you have a Notification model
+    return render_template('admin_notifications.html', notifications=notifications)
+
+
 # Route for user login
+from flask import flash
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Validate user credentials
-        # If valid, store user ID in session and redirect to user dashboard
-        pass
+        # Get user credentials from the form
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Check if the user exists in the database
+        user = User.query.filter_by(username=username).first()
+        
+        if user:
+            # If user exists, check if the account is approved
+            if user.approved:
+                # If approved, authenticate the password
+                if user.password == password:
+                    # If authenticated, store user ID in session
+                    session['user_id'] = user.id
+                    return redirect(url_for('dashboard'))
+                else:
+                    flash('Invalid username or password', 'error')
+            else:
+                flash('Your account is still pending approval by the admin', 'warning')
+        else:
+            # If user does not exist, create a new user
+            new_user = User(username=username, password=password)
+            db.session.add(new_user)
+            db.session.commit()
+            session['user_id'] = new_user.id
+            flash('Account created successfully. Your account is pending approval by the admin', 'success')
+            return redirect(url_for('dashboard'))
+    
     return render_template('login.html')
+
 
 # Route for user dashboard
 @app.route('/dashboard')
