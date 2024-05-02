@@ -7,7 +7,6 @@ app.config['SECRET_KEY'] = 'secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:Pennsylvania2004!@localhost/fp170'
 db = SQLAlchemy(app)
 
-# Define User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -21,7 +20,6 @@ class User(db.Model):
     balance = db.Column(db.Float, default=0)
     approved = db.Column(db.Boolean, default=False)
 
-# Define Transaction model
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -33,7 +31,6 @@ class Transaction(db.Model):
 def index():
     return render_template('base.html')
 
-# Admin route to view and approve user accounts
 @app.route('/admin')
 def admin():
     if 'admin_id' not in session:
@@ -73,17 +70,17 @@ def register():
 def login():
     if request.method == 'POST':
         # Validate user credentials
-        # If valid, store user ID in session and redirect to user homepage
+        # If valid, store user ID in session and redirect to user dashboard
         pass
     return render_template('login.html')
 
-# Route for user homepage
-@app.route('/homepage')
-def homepage():
+# Route for user dashboard
+@app.route('/dashboard')
+def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     user = User.query.get(session['user_id'])
-    return render_template('homepage.html', user=user)
+    return render_template('dashboard.html', user=user)
 
 # Route for adding money to the account
 @app.route('/add_money', methods=['POST'])
@@ -91,7 +88,7 @@ def add_money():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     # Process payment information and update user balance
-    return redirect(url_for('homepage'))
+    return redirect(url_for('dashboard'))
 
 # Route for sending money to another user
 @app.route('/send_money', methods=['POST'])
@@ -99,7 +96,7 @@ def send_money():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     # Process transaction information and update sender and recipient balances
-    return redirect(url_for('homepage'))
+    return redirect(url_for('dashboard'))
 
 # Route for viewing bank statements
 @app.route('/bank_statement')
