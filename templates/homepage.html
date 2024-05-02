@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block body %}
+{% block heading %}Homepage{% endblock %}
+{% block content %}
     <h1>Homepage</h1>
     <h2>Welcome, {{ user.first_name }} {{ user.last_name }}</h2>
     <p>Username: {{ user.username }}</p>
