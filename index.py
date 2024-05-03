@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -62,9 +62,6 @@ def admin_login():
             return render_template('admin_login.html', error='Invalid username or password')
     return render_template('admin_login.html')
 
-# Route for user registration
-from flask import flash, jsonify
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -89,12 +86,10 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         
-        # Set the user_id in the session after registration
         session['user_id'] = new_user.id
         
         return redirect(url_for('dashboard'))
     
-    # Render the registration form for GET requests
     return render_template('register.html')
 
 from flask import render_template
@@ -104,21 +99,15 @@ def admin_notifications():
     if 'admin_id' not in session or session['admin_id'] != 1:
         return redirect(url_for('admin_login'))
 
-    notifications = Notification.query.all()  # Assuming you have a Notification model
+    notifications = Notification.query.all()
     return render_template('admin_notifications.html', notifications=notifications)
-
-
-# Route for user login
-from flask import flash
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Get user credentials from the form
         username = request.form['username']
         password = request.form['password']
         
-        # Check if the user exists in the database
         user = User.query.filter_by(username=username).first()
         
         if user:
@@ -134,7 +123,6 @@ def login():
             else:
                 flash('Your account is still pending approval by the admin', 'warning')
         else:
-            # If user does not exist, create a new user
             new_user = User(username=username, password=password)
             db.session.add(new_user)
             db.session.commit()

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block heading %}Add Money{% endblock %}
+{% block content %}
+    <h1>User Registration</h1>
+    <form action="/add_money" method="POST">
+        <label for="card_number">Card Number:</label>
+        <input type="text" id="card_number" name="card_number" required><br><br>
+        <label for="expiry">Expiry:</label>
+        <input type="text" id="expiry" name="expiry" required><br><br>
+        <label for="cvv">CVV:</label>
+        <input type="text" id="cvv" name="cvv" required><br><br>
+        <label for="amount">Amount:</label>
+        <button type="submit">Add</button>
+    </form>
+{% endblock %}
