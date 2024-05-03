@@ -38,6 +38,7 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f"Notification('{self.message}', '{self.created_at}')"
+    
 
 @app.route('/')
 def index():
@@ -128,6 +129,41 @@ def admin_notifications():
     notifications = Notification.query.all()
     return render_template('admin_notifications.html', notifications=notifications)
 
+@app.route('/send_money', methods=['POST'])
+def send_money():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    # Get form data
+    recipient_username = request.form['recipient_username']  # Assuming you have a form field for recipient's username
+    amount = float(request.form['amount'])
+
+    # Query the recipient based on the username
+    recipient = User.query.filter_by(username=recipient_username).first()
+
+    if not recipient:
+        flash('Recipient account not found.', 'error')
+        return redirect(url_for('dashboard'))
+
+    sender_id = session['user_id']
+    sender = User.query.get(sender_id)
+
+    if sender.balance < amount:
+        flash('Insufficient balance.', 'error')
+        return redirect(url_for('dashboard'))
+
+    sender.balance -= amount
+    recipient.balance += amount
+
+    # Add transaction record
+    transaction = Transaction(sender_id=sender_id, recipient_id=recipient.id, amount=amount)
+    db.session.add(transaction)
+    db.session.commit()
+
+    flash('Money sent successfully.', 'success')
+    return redirect(url_for('dashboard'))
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -175,12 +211,7 @@ def add_money():
     return redirect(url_for('dashboard'))
 
 # Route to send money from user account
-@app.route('/send_money', methods=['POST'])
-def send_money():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    # Process transaction information and update sender and recipient balances
-    return redirect(url_for('dashboard'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
