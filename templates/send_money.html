@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, {{ user.username }}!</h1>
+    <p>Balance: ${{ user.balance }}</p>
+
+    <h2>Send Money</h2>
+    <form method="POST" action="{{ url_for('send_money') }}">
+        <label for="recipient_username">Recipient Username:</label>
+        <input type="text" name="recipient_username" required><br>
+        <label for="amount">Amount:</label>
+        <input type="number" name="amount" min="0.01" step="0.01" required><br>
+        <button type="submit">Send Money</button>
+    </form>
+
+    <h2>Transactions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Sender</th>
+                <th>Recipient</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in user.transactions %}
+                <tr>
+                    <td>{{ transaction.id }}</td>
+                    <td>{{ transaction.sender.username }}</td>
+                    <td>{{ transaction.recipient.username }}</td>
+                    <td>${{ transaction.amount }}</td>
+                    <td>{{ transaction.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>
