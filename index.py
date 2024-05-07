@@ -166,13 +166,37 @@ def dashboard():
     user = User.query.get(session['user_id'])
     return render_template('dashboard.html', user=user)
 
-# Route to add money to the user account
-@app.route('/add_money', methods=['POST'])
+@app.route('/add_money', methods=['GET', 'POST'])
 def add_money():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    # Process payment information and update user balance
-    return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        # Extract amount from the form data
+        amount = request.form.get('amount')
+
+        # Check if amount is provided and is a valid number
+        if amount is None or not amount.isdigit():
+            flash('Invalid amount provided', 'error')
+            return redirect(url_for('dashboard'))
+
+        # Convert amount to float
+        amount = float(amount)
+
+        # Retrieve the user from the database
+        user = User.query.get(session['user_id'])
+
+        # Update the user's balance
+        user.balance += amount
+
+        # Save the updated user object back to the database
+        db.session.commit()
+
+        # Redirect to the dashboard
+        return redirect(url_for('dashboard'))
+
+    # Render the add_money.html template for GET request
+    return render_template('add_money.html')
 
 # Route to send money from user account
 @app.route('/send_money', methods=['POST'])
