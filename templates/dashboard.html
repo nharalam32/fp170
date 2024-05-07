@@ -11,11 +11,15 @@
         border: none;
         border-radius: 5px;
     }
+    .btn:hover {
+        background-color: #0056b3;
+        cursor: pointer;
+    }
 </style>
     <h2>Welcome, {{ user.first_name }} {{ user.last_name }}</h2>
     <p>Username: {{ user.username }}</p>
     <p>Balance: ${{ '%.2f'|format(user.balance) }}</p>
-    <form action="/add_money" method="GET"> <!-- Change method to GET and action to "/add_money" -->
+    <form action="/add_money" method="GET">
         <button type="submit" class="btn">Add Money</button>
     </form>        
     <form action="/send_money" method="POST">
