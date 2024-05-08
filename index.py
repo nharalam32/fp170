@@ -36,7 +36,7 @@ class Transaction(db.Model):
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     message = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
 
     def __repr__(self):
         return f"Notification('{self.message}', '{self.created_at}')"
