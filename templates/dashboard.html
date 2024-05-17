@@ -1,10 +1,27 @@
 {% extends "base.html" %}
 {% block heading %}Dashboard{% endblock %}
 {% block content %}
+<style>
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        border: none;
+        border-radius: 5px;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+        cursor: pointer;
+    }
+</style>
     <h2>Welcome, {{ user.first_name }} {{ user.last_name }}</h2>
     <p>Username: {{ user.username }}</p>
-    <p>Balance: ${{ user.balance }}</p>
-    <a href="/add_money">Add Money</a>
+    <p>Balance: ${{ '%.2f'|format(user.balance) }}</p>
+    <form action="/add_money" method="GET">
+        <button type="submit" class="btn">Add Money</button>
+    </form>        
     <form action="/send_money" method="POST">
         <label for="recipient_username">Recipient Username:</label>
         <input type="text" id="recipient_username" name="recipient_username" required>
